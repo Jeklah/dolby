@@ -26,7 +26,7 @@ def dolby_cli():
 @dolby_cli.command()
 @click.argument('input_file')
 @click.argument('output_file')
-def create_dolby_digital_plus(input_file, output_file):
+def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     command = f'wine DDP_Pro_Enc_v3.10.2_x86_32.exe -md0 -i"{input_file}" -o"{output_file}" -ac21'
     subprocess.call(command, shell=True)
 
@@ -36,7 +36,7 @@ def create_dolby_digital_plus(input_file, output_file):
 @dolby_cli.command()
 @click.argument('input_file')
 @click.argument('output_file')
-def create_dolby_digitial(input_file, output_file):
+def create_dolby_digitial(input_file: str, output_file: str) -> None:
     command = f'wine DDP_Pro_Enc_v3.10.2_x86_32.exe -md1 -i"{input_file}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
@@ -47,7 +47,7 @@ def create_dolby_digitial(input_file, output_file):
 @click.argument('input_file')
 @click.argument('output_file')
 @click.argument('speaker_layout')
-def program_configuration(input_file, output_file, speaker_layout):
+def program_configuration(input_file: str, output_file: str, speaker_layout: str) -> None:
     command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "acmod={speaker_layout}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
@@ -58,7 +58,7 @@ def program_configuration(input_file, output_file, speaker_layout):
 @click.argument('input_file')
 @click.argument('output_file')
 @click.argument('speaker_layout')
-def speaker_layout(input_file, output_file, speaker_layout):
+def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> None:
     command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "channel_layout={speaker_layout}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
