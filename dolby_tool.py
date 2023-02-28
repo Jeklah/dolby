@@ -48,6 +48,9 @@ def create_dolby_digitial(input_file: str, output_file: str) -> None:
 @click.argument('output_file')
 @click.argument('speaker_layout')
 def program_configuration(input_file: str, output_file: str, speaker_layout: str) -> None:
+    """
+
+    """
     command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "acmod={speaker_layout}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
@@ -59,6 +62,17 @@ def program_configuration(input_file: str, output_file: str, speaker_layout: str
 @click.argument('output_file')
 @click.argument('speaker_layout')
 def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> None:
+    """
+    This sub-command will change the program configuration to what the user
+    would like.
+    It is worth noting that Dolby Digital only supports up to 5.1.
+    If the program configuration desired is 7.1 or above, Dolby Digital Plus
+    must be used.
+
+    :param str: Name of the input file.
+    :param str: Name of the output file.
+    :param str: Program configuration the user would like.
+    """
     command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "channel_layout={speaker_layout}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
