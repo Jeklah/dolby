@@ -27,6 +27,12 @@ def dolby_cli():
 @click.argument('input_file')
 @click.argument('output_file')
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
+    """
+    Sub-command to create Dolby Digital Plus files.
+
+    :param str: String to be used as the input file name.
+    :param str: String to be used as the output file name.
+    """
     command = f'wine DDP_Pro_Enc_v3.10.2_x86_32.exe -md0 -i"{input_file}" -o"{output_file}" -ac21'
     subprocess.call(command, shell=True)
 
@@ -37,23 +43,29 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
 @click.argument('input_file')
 @click.argument('output_file')
 def create_dolby_digitial(input_file: str, output_file: str) -> None:
+    """
+    Sub-command to create Dolby Digital files.
+
+    :param str: String to be used as the input file name.
+    :param str: String to be used as the output file name.
+    """
     command = f'wine DDP_Pro_Enc_v3.10.2_x86_32.exe -md1 -i"{input_file}" -o"{output_file}"'
     subprocess.call(command, shell=True)
 
 
-# This is the sub-command to modify the program configuration.
-# It takes the input file, the output file and the speaker layout as arguments.
-@dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
-@click.argument('speaker_layout')
-def program_configuration(input_file: str, output_file: str, speaker_layout: str) -> None:
-    """
-
-    """
-    command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "acmod={speaker_layout}" -o"{output_file}"'
-    subprocess.call(command, shell=True)
-
+# # This is the sub-command to modify the program configuration.
+# # It takes the input file, the output file and the speaker layout as arguments.
+# @dolby_cli.command()
+# @click.argument('input_file')
+# @click.argument('output_file')
+# @click.argument('speaker_layout')
+# def program_configuration(input_file: str, output_file: str, speaker_layout: str) -> None:
+#     """
+#     This sub-command will modify the program configuration.
+#     """
+#     command = f'ffmpeg -i"{input_file}" -c copy -metadata:s:a:0 "acmod={speaker_layout}" -o"{output_file}"'
+#     subprocess.call(command, shell=True)
+#  Commented out as it essentially does the same as below.
 
 # This is the sub-command to modify the speaker layout.
 # It takes the input file, the output file and the speaker layout as arguments.
