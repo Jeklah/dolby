@@ -67,6 +67,7 @@ def create_dolby_digitial(input_file: str, output_file: str) -> None:
 #     subprocess.call(command, shell=True)
 #  Commented out as it essentially does the same as below.
 
+
 # This is the sub-command to modify the speaker layout.
 # It takes the input file, the output file and the speaker layout as arguments.
 @dolby_cli.command()
@@ -97,8 +98,8 @@ def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> No
 @click.argument('output_file')
 def extract_audio(input_file: str, output_file: str) -> None:
     """
-    Sub-command that extracts the audio from a video file and outputs it as a
-    .wav file.
+    Sub-command that extracts the audio from a video file
+    and outputs it as a .wav file.
 
     :param str: Name of the input file
     :param str: Name of the output file
@@ -116,8 +117,54 @@ def extract_dolby(input_file: str, output_file: str) -> None:
     Sub-command that extracts the Dolby audio from an audio file
     and outputs it as a .wav file.
 
-    :param str: Name of the input_file.
-    :param str: Name of the output_file
+    This function assumes Dolby pairs are on pairs 7 and 8.
+
+    :param str: Name of the input file.
+    :param str: Name of the output file
     """
-    command = f'ffmpeg -i {input_file}.wav -af "pan=quad|c0=c12|c1=c13|c2=c12|c3=c13" {output_file}.wav'
+    command = f'ffmpeg -i {input_file}.wav -af "pan=quad|c0=c12|c1=c13" {output_file}.wav'
+    subprocess.call(command, shell=True)
+
+
+@dolby_cli.command()
+@click.argument('input_file')
+@click.argument('output_file')
+def decode_dolby(input_file: str, output_file: str) -> None:
+    """
+    Sub-command for decoding Dolby Digital to a .wav file.
+
+    :param str: Name of the input file.
+    :param str: Name of the output file.
+    """
+    command = f'ffmpeg -i {input_file}.wav -acodec pcm_s16le -ar 48000 -ac 8 {output_file}.wav'
+    subprocess.call(command, shell=True)
+
+
+@dolby_cli.command()
+@click.argument('input_file')
+@click.argument('output_file')
+def unwrap_as_337(input_file: str, output_file: str) -> None:
+    """
+    Sub-command to unwrap a .wav file in a .EC3/AC3 file.
+
+    :param str: Name of the input file.
+    :param str: Name of the output file.
+    """
+    command = f'wine smpte.exe -d -i{input_file} -o{output_file}'
+    subprocess.call(command, shell=True)
+
+
+@dolby_cli.command()
+@click.argument('input_file')
+@click.argument('output_file')
+def wrap_as_dolby(input_file: str, output_file: str) -> None:
+    """
+    Sub-command to de-wrap a .EC3/AC3 file into a wav file.
+
+    NOTE: This does not decode the dolby. It just changes it from .wav to .
+
+    :param str: Name of the input file.
+    :param str: Name of the output file.
+    """
+    command = f'wine smpte.exe -i{input_file} -o{output_file}'
     subprocess.call(command, shell=True)
