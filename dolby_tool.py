@@ -14,6 +14,9 @@ import os
 
 # This is the main command. It is the base command for all sub-commands.
 @click.group()
+@click.argument('input_file')
+@click.argument('output_file')
+@click.argument('speaker_layout')
 def dolby_cli():
     """
     Main command that covers the sub commands.
@@ -24,8 +27,6 @@ def dolby_cli():
 # This is the sub-command to create the Dolby Digital Plus file.
 # It takes the input file and the output file as arguments.
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     """
     Sub-command to create Dolby Digital Plus files.
@@ -40,8 +41,6 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
 # This is the sub-command to create the Dolby Digital file.
 # It takes the input file and the output file as arguments.
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def create_dolby_digitial(input_file: str, output_file: str) -> None:
     """
     Sub-command to create Dolby Digital files.
@@ -71,9 +70,6 @@ def create_dolby_digitial(input_file: str, output_file: str) -> None:
 # This is the sub-command to modify the speaker layout.
 # It takes the input file, the output file and the speaker layout as arguments.
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
-@click.argument('speaker_layout')
 def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> None:
     """
     This sub-command will change the program configuration to what the user
@@ -94,8 +90,6 @@ def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> No
 # .mov extension)
 # It takes an input video file and outputs a .wav audio file.
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def extract_audio(input_file: str, output_file: str) -> None:
     """
     Sub-command that extracts the audio from a video file
@@ -110,8 +104,6 @@ def extract_audio(input_file: str, output_file: str) -> None:
 
 # This sub-command extracts the Dolby from the audio file.
 @dolby_cli.command()
-@click.argument('input_file')
-@click.command('output_file')
 def extract_dolby(input_file: str, output_file: str) -> None:
     """
     Sub-command that extracts the Dolby audio from an audio file
@@ -127,8 +119,6 @@ def extract_dolby(input_file: str, output_file: str) -> None:
 
 
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def decode_dolby(input_file: str, output_file: str) -> None:
     """
     Sub-command for decoding Dolby Digital to a .wav file.
@@ -141,11 +131,9 @@ def decode_dolby(input_file: str, output_file: str) -> None:
 
 
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def unwrap_as_337(input_file: str, output_file: str) -> None:
     """
-    Sub-command to unwrap a .wav file in a .EC3/AC3 file.
+    Sub-command to wrap a EC3/AC3 to wav file.
 
     :param str: Name of the input file.
     :param str: Name of the output file.
@@ -155,16 +143,31 @@ def unwrap_as_337(input_file: str, output_file: str) -> None:
 
 
 @dolby_cli.command()
-@click.argument('input_file')
-@click.argument('output_file')
 def wrap_as_dolby(input_file: str, output_file: str) -> None:
     """
     Sub-command to de-wrap a .EC3/AC3 file into a wav file.
 
-    NOTE: This does not decode the dolby. It just changes it from .wav to .
+    NOTE: This does not decode the dolby. It just changes it from .wav to .EC3/AC3 file.
 
     :param str: Name of the input file.
     :param str: Name of the output file.
     """
     command = f'wine smpte.exe -i{input_file} -o{output_file}'
     subprocess.call(command, shell=True)
+
+
+def main(input_file: str, output_file: str, speaker_layout: str
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+    main()
