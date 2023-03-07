@@ -70,7 +70,7 @@ def create_dolby_digitial(input_file: str, output_file: str) -> None:
 # This is the sub-command to modify the speaker layout.
 # It takes the input file, the output file and the speaker layout as arguments.
 @dolby_cli.command()
-def speaker_layout(input_file: str, output_file: str, speaker_layout: str) -> None:
+def program_configuration(input_file: str, output_file: str, speaker_layout: str) -> None:
     """
     This sub-command will change the program configuration to what the user
     would like.
@@ -156,17 +156,31 @@ def wrap_as_dolby(input_file: str, output_file: str) -> None:
     subprocess.call(command, shell=True)
 
 
-def main(input_file: str, output_file: str, speaker_layout: str
+def main(input_file: str, output_file: str, speaker_layout: str) -> None:
 
+    # This is the main function that runs the program.
+    # It takes the input file, the output file and the speaker
+    # layout as arguments.
+    # It then asks the user for some input as to what the user would
+    # like to do next.
 
+    # This is the sub-command to extract the audio from the video file.
+    extract_audio(input_file, output_file)
 
+    # This is the sub-command to extract the Dolby audio from the audio file.
+    extract_dolby(input_file, output_file)
 
+    # This is the sub-command to decode the Dolby audio.
+    decode_dolby(input_file, output_file)
 
+    # This is the sub-command to modify the program configuration.
+    program_configuration(input_file, output_file, speaker_layout)
 
+    # This is the sub-command to create the Dolby Digital file.
+    create_dolby_digitial(input_file, output_file)
 
-
-
-
+    # This is the sub-command to create the Dolby Digital Plus file.
+    create_dolby_digital_plus(input_file, output_file)
 
 
 if __name__ == '__main__':
