@@ -42,9 +42,10 @@ def main():
     action_choice = click.prompt('Please choose an action', type=int)
 
     click.echo(f'You chose: {action_choice}: {actions[action_choice]}')
-    click.echo(f'The channels you chose are: ')
+    click.echo('The channels you chose are: ')
     for chan in dolby_channels:
         click.echo(f'{chan}')
+
     click.echo(f'{len(dolby_channels)}')
 
 
