@@ -19,13 +19,7 @@ def create_dolby_digital(input_file: str, output_file: str) -> None:
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     command = f'wine "{DDP_ENC_LOCATION}" -md1 -i"{input_file}" -o"{output_file}.ac3"'
-    print('about to run wine')
     subprocess.call(command, shell=True)
-    print('wine has been run')
-    # print('wrapping in smpte')
-    # smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ac3" -o"{output_file}.wav"'
-    # subprocess.call(smpte_wrap, shell=True)
-    # print('smpte wrapping complete')
 
 
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
@@ -37,14 +31,8 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     """
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
-    print('about to run Dolby ')
     command = f'wine "{DDP_ENC_LOCATION}" -md0 -i"{input_file}" -o"{output_file}.ec3"'
     subprocess.call(command, shell=True)
-    print('wine has been run')
-    # print('wrapping in smpte')
-    # smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ec3" -o"{output_file}.wav"'
-    # subprocess.call(smpte_wrap, shell=True)
-    # print('smpte wrapping complete')
 
 
 def smpte_wrapper(input_file: str, filetype: str) -> None:
