@@ -1,5 +1,7 @@
-import subprocess
+#!/bin/env python3
+
 import os
+import subprocess
 import click
 
 
@@ -7,7 +9,7 @@ DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/
 SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
 
 
-def create_dolby_digital(input_file: str, output_file: str) -> str:
+def create_dolby_digital(input_file: str, output_file: str) -> None:
     """
     Command to create Dolby Digital Plus files.
 
@@ -16,16 +18,14 @@ def create_dolby_digital(input_file: str, output_file: str) -> str:
     """
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
-    filetype = 'ac3'
     command = f'wine "{DDP_ENC_LOCATION}" -md1 -i"{input_file}" -o"{output_file}.ac3"'
     print('about to run wine')
     subprocess.call(command, shell=True)
     print('wine has been run')
-    print('wrapping in smpte')
-    smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ac3" -o"{output_file}.wav"'
-    subprocess.call(smpte_wrap, shell=True)
-    print('smpte wrapping complete')
-    # return filetype
+    # print('wrapping in smpte')
+    # smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ac3" -o"{output_file}.wav"'
+    # subprocess.call(smpte_wrap, shell=True)
+    # print('smpte wrapping complete')
 
 
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
@@ -41,20 +41,21 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     command = f'wine "{DDP_ENC_LOCATION}" -md0 -i"{input_file}" -o"{output_file}.ec3"'
     subprocess.call(command, shell=True)
     print('wine has been run')
-    print('wrapping in smpte')
-    smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ec3" -o"{output_file}.wav"'
+    # print('wrapping in smpte')
+    # smpte_wrap = f'wine "{SMPTE_LOCATION}" -i"{output_file}.ec3" -o"{output_file}.wav"'
+    # subprocess.call(smpte_wrap, shell=True)
+    # print('smpte wrapping complete')
+
+
+def smpte_wrapper(input_file: str, filetype: str) -> None:
+    """
+    Wrap .ac3 or .ec3 file as SMPTE .wav file.
+
+    :param str: String to be used as the input file.
+    :param str: String to be used as the filetype of the input file.
+    """
+    smpte_wrap = f'wine "{SMPTE_LOCATION}" -i{input_file}.{filetype} -o"{input_file}.wav"'
     subprocess.call(smpte_wrap, shell=True)
-    print('smpte wrapping complete')
-
-
-# def smpte_wrap(input_file: str, filetype: str) -> None:
-#     """
-#     Wrap .ac3 or .ec3 file as SMPTE .wav file.
-#
-#     :param str: String to be used as the input file.
-#     """
-#     smpte_wrap = f'wine "{SMPTE_LOCATION}" -i{input_file}.{filetype} -o"{input_file}"'
-#     subprocess.call(smpte_wrap, shell=True)
 
 
 def change_program_config(input_file: str, prog_config: int) -> None:
@@ -95,18 +96,18 @@ def change_program_config(input_file: str, prog_config: int) -> None:
 @click.option('--dolby_digital', '-cdd', help='Create a Dolby Digital file', type=str)
 @click.option('--dolby_digital_plus', '-cddp', help='Create a Dolby Digital Plus file', type=str)
 @click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=int)
-@click.option('--smpte_flag', '-smpte_flag', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', type=bool)
-def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte_flag: bool):
+@click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
+def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool):
     if dolby_digital:
         create_dolby_digital(
             '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', dolby_digital)
-        if smpte_flag:
-            smpte_wrap(f'{dolby_digital}', f'{filetype}')
+        if smpte:
+            smpte_wrapper(f'{dolby_digital}', 'ac3')
     if dolby_digital_plus:
         create_dolby_digital_plus(
             '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', dolby_digital_plus)
-        if smpte_flag:
-            smpte_wrap(dolby_digital_plus)
+        if smpte:
+            smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
     if program_config:
         change_program_config(
             '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', program_config)
