@@ -16,8 +16,6 @@ def create_dolby_digital(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    filepath_length = len(input_file.split('/'))
-    filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     command = f'wine "{DDP_ENC_LOCATION}" -md1 -i"{input_file}" -o"{output_file}.ac3"'
     subprocess.call(command, shell=True)
 
@@ -29,8 +27,6 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    filepath_length = len(input_file.split('/'))
-    filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     command = f'wine "{DDP_ENC_LOCATION}" -md0 -i"{input_file}" -o"{output_file}.ec3"'
     subprocess.call(command, shell=True)
 
@@ -74,18 +70,18 @@ def change_program_config(input_file: str, prog_config: int) -> None:
     print('starting changing program config')
     print(f'{input_file}')
     if prog_config in {1, 2}:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o./"{filename}.{filetype}" -a"{prog_config}" -l0'
+        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{filename}.{filetype}" -a"{prog_config}" -l0'
     else:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o./"{filename}.{filetype}" -a"{prog_config}" -l1'
+        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{filename}.{filetype}" -a"{prog_config}" -l1'
     subprocess.call(command, shell=True)
 
 
 @click.command()
 @click.option('--dolby_digital', '-cdd', help='Create a Dolby Digital file', type=str)
 @click.option('--dolby_digital_plus', '-cddp', help='Create a Dolby Digital Plus file', type=str)
-@click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=int)
+@click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=click.Tuple([int, str]))
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
-def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool):
+def main(dolby_digital: str, dolby_digital_plus: str, program_config: tuple, smpte: bool):
     if dolby_digital:
         create_dolby_digital(
             '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', dolby_digital)
@@ -97,8 +93,9 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
         if smpte:
             smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
     if program_config:
+        program_conf, output_file_name = program_config
         change_program_config(
-            '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', program_config)
+            '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', program_conf)
 
 
 if __name__ == '__main__':
