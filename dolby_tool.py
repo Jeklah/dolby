@@ -1,12 +1,11 @@
 #!/bin/env python3
 
-import os
 import subprocess
 import click
 
-
 DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/DDP_Pro_Enc_v3.10.2_x86_32.exe'
 SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
+STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023/'
 
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
@@ -42,7 +41,7 @@ def smpte_wrapper(input_file: str, filetype: str) -> None:
     subprocess.call(smpte_wrap, shell=True)
 
 
-def change_program_config(input_file: str, prog_config: int) -> None:
+def change_program_config(input_file: str, program_config: int, output_file="") -> None:
     """
     Change the program configuration/speaker layout of a Dolby file.
 
@@ -62,6 +61,7 @@ def change_program_config(input_file: str, prog_config: int) -> None:
         21,  # L R C LFE Ls Rs Lrs Rrs
         24   # L R C LFE Ls Rs Cs
     ]
+    # program_configuration, output_file_name = prog_config
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
@@ -69,33 +69,59 @@ def change_program_config(input_file: str, prog_config: int) -> None:
     print(f'{filetype}')
     print('starting changing program config')
     print(f'{input_file}')
-    if prog_config in {1, 2}:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{filename}.{filetype}" -a"{prog_config}" -l0'
+    if output_file == "":
+        output_file = filename
+    if program_config in {1, 2}:
+        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{output_file}.{filetype}" -a"{program_config}" -l0'
+        print(f'{command}')
     else:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{filename}.{filetype}" -a"{prog_config}" -l1'
+        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{output_file}.{filetype}" -a"{program_config}" -l1'
+        print(f'{command}')
     subprocess.call(command, shell=True)
 
 
 @click.command()
 @click.option('--dolby_digital', '-cdd', help='Create a Dolby Digital file', type=str)
 @click.option('--dolby_digital_plus', '-cddp', help='Create a Dolby Digital Plus file', type=str)
-@click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=click.Tuple([int, str]))
+@click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=int)
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
-def main(dolby_digital: str, dolby_digital_plus: str, program_config: tuple, smpte: bool):
-    if dolby_digital:
+@click.option('--input_file', '-i', help='String to be used as the input file', type=str)
+@click.option('--output_file', '-o', help='String to be used as the output file', type=str)
+def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool, input_file: str, output_file: str):
+    if dolby_digital and not program_config:
         create_dolby_digital(
-            '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', dolby_digital)
+            f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital)
         if smpte:
             smpte_wrapper(f'{dolby_digital}', 'ac3')
-    if dolby_digital_plus:
+    if dolby_digital_plus and not program_config:
         create_dolby_digital_plus(
-            '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', dolby_digital_plus)
+            f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital_plus)
         if smpte:
             smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
-    if program_config:
-        program_conf, output_file_name = program_config
+
+    elif program_config and input_file and output_file:
+        change_program_config(input_file, program_config, output_file)
+    elif program_config and input_file:
+        change_program_config(input_file, program_config)
+    elif program_config and output_file:
         change_program_config(
-            '/media/sf_Shared_Folder/dolby/2023/flight_audio.wav', program_conf)
+            f'{STD_IO_LOCATION}/flight_audio.wav', program_config, output_file)
+
+    elif program_config and dolby_digital and not smpte:
+        create_dolby_digital(f'{STD_IO_LOCATION}/flight_audio.wav',
+                             f'{STD_IO_LOCATION}/{dolby_digital}')
+        change_program_config(
+            f'/{dolby_digital}.ac3', program_config)
+
+    elif program_config and dolby_digital_plus and not smpte:
+        create_dolby_digital_plus('{STD_IO_LOCATION}/flight_audio.wav',
+                                  f'{STD_IO_LOCATION}/{dolby_digital_plus}')
+        change_program_config(
+            f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
+
+    elif program_config:
+        change_program_config(
+            f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
 
 
 if __name__ == '__main__':
