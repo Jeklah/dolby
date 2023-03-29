@@ -15,7 +15,7 @@ def create_dolby_digital(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    command = f'wine "{DDP_ENC_LOCATION}" -md1 -i"{input_file}" -o"{output_file}.ac3"'
+    command = f'wine {DDP_ENC_LOCATION} -md1 -i{input_file} -o{output_file}.ac3'
     subprocess.call(command, shell=True)
 
 
@@ -26,7 +26,7 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    command = f'wine "{DDP_ENC_LOCATION}" -md0 -i"{input_file}" -o"{output_file}.ec3"'
+    command = f'wine {DDP_ENC_LOCATION} -md0 -i{input_file} -o{output_file}.ec3'
     subprocess.call(command, shell=True)
 
 
@@ -37,7 +37,7 @@ def smpte_wrapper(input_file: str, filetype: str) -> None:
     :param str: String to be used as the input file.
     :param str: String to be used as the filetype of the input file.
     """
-    smpte_wrap = f'wine "{SMPTE_LOCATION}" -i{input_file}.{filetype} -o"{input_file}.wav"'
+    smpte_wrap = f'wine {SMPTE_LOCATION} -i{input_file}.{filetype} -o{input_file}.wav'
     subprocess.call(smpte_wrap, shell=True)
 
 
@@ -65,18 +65,12 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
-    print(f'{filename}')
-    print(f'{filetype}')
-    print('starting changing program config')
-    print(f'{input_file}')
     if output_file == "":
         output_file = filename
     if program_config in {1, 2}:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{output_file}.{filetype}" -a"{program_config}" -l0'
-        print(f'{command}')
+        command = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config} -l0'
     else:
-        command = f'wine "{DDP_ENC_LOCATION}" -i"{input_file}" -o"./{output_file}.{filetype}" -a"{program_config}" -l1'
-        print(f'{command}')
+        command = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config} -l1'
     subprocess.call(command, shell=True)
 
 
@@ -101,27 +95,39 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
 
     elif program_config and input_file and output_file:
         change_program_config(input_file, program_config, output_file)
+        if smpte:
+            smpte_wrapper(f'{output_file}', f'{input_file.split(".")[1]}')
     elif program_config and input_file:
         change_program_config(input_file, program_config)
+        if smpte:
+            smpte_wrapper(f'{output_file}', f'{input_file.split(".")[1]}')
     elif program_config and output_file:
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config, output_file)
+        if smpte:
+            smpte_wrapper(f'{output_file}', 'wav')
 
-    elif program_config and dolby_digital and not smpte:
+    elif program_config and dolby_digital:
         create_dolby_digital(f'{STD_IO_LOCATION}/flight_audio.wav',
                              f'{STD_IO_LOCATION}/{dolby_digital}')
         change_program_config(
-            f'/{dolby_digital}.ac3', program_config)
+            f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
+        if smpte:
+            smpte_wrapper(f'{dolby_digital}', 'ac3')
 
-    elif program_config and dolby_digital_plus and not smpte:
+    elif program_config and dolby_digital_plus:
         create_dolby_digital_plus('{STD_IO_LOCATION}/flight_audio.wav',
                                   f'{STD_IO_LOCATION}/{dolby_digital_plus}')
         change_program_config(
             f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
+        if smpte:
+            smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
 
     elif program_config:
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
+        if smpte:
+            smpte_wrapper('flight_audio.wav', 'wav')
 
 
 if __name__ == '__main__':
