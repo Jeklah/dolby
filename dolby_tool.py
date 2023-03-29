@@ -5,7 +5,7 @@ import click
 
 DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/DDP_Pro_Enc_v3.10.2_x86_32.exe'
 SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
-STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023/'
+STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023'
 
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
@@ -61,7 +61,6 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
         21,  # L R C LFE Ls Rs Lrs Rrs
         24   # L R C LFE Ls Rs Cs
     ]
-    # program_configuration, output_file_name = prog_config
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
@@ -81,18 +80,52 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
 @click.option('--input_file', '-i', help='String to be used as the input file', type=str)
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
-def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool, input_file: str, output_file: str):
-    if dolby_digital and not program_config:
+def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool, input_file: str, output_file: str) -> None:
+    """
+    This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
+    files as well as changing the program configuration and SMPTE wrapping.
+    Input file and output file can be specified, if they are not, the output
+    file name will be the same as the input file.
+    If the input file is not provided, this will use the file flight_audio.wav
+    as an example.
+
+    :param str: String to be used as the Dolby Digital file name on creation.
+    :param str: String to be used as the Dolby Digital Plus file name on creation.
+    :param int: Integer to be used to identify the desired program configuration to be used.
+    :param bool: Flag for whether the output file is to be SMPTE wrapped.
+    :param str: String to be used as the input file.
+    :param str: String to be used as the output file.
+    """
+    # Handling the creation of dolby digital files and whether the program
+    # configuration is to be changed as well as SMPTE wrapping.
+    if dolby_digital:
         create_dolby_digital(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital)
+        if program_config:
+            change_program_config(
+                f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
         if smpte:
             smpte_wrapper(f'{dolby_digital}', 'ac3')
-    if dolby_digital_plus and not program_config:
+
+    # Handling creation of dolby digital plus files and whether the program
+    # configuration is to be changed as well as SMPTE wrapping.
+    if dolby_digital_plus:
         create_dolby_digital_plus(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital_plus)
+        if program_config:
+            change_program_config(
+                f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
         if smpte:
             smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
 
+    # Changing program configuration with no input or output and without
+    # creating a dolby file. (Not a likely use case).
+    if program_config and not dolby_digital and not dolby_digital_plus and not input_file and not output_file:
+        change_program_config(
+            f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
+
+    # Handling changing program configuration when input_file and output_file
+    # are provided.
     elif program_config and input_file and output_file:
         change_program_config(input_file, program_config, output_file)
         if smpte:
@@ -100,34 +133,12 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
     elif program_config and input_file:
         change_program_config(input_file, program_config)
         if smpte:
-            smpte_wrapper(f'{output_file}', f'{input_file.split(".")[1]}')
+            smpte_wrapper(f'{input_file}', f'{input_file.split(".")[1]}')
     elif program_config and output_file:
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config, output_file)
         if smpte:
             smpte_wrapper(f'{output_file}', 'wav')
-
-    elif program_config and dolby_digital:
-        create_dolby_digital(f'{STD_IO_LOCATION}/flight_audio.wav',
-                             f'{STD_IO_LOCATION}/{dolby_digital}')
-        change_program_config(
-            f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
-        if smpte:
-            smpte_wrapper(f'{dolby_digital}', 'ac3')
-
-    elif program_config and dolby_digital_plus:
-        create_dolby_digital_plus('{STD_IO_LOCATION}/flight_audio.wav',
-                                  f'{STD_IO_LOCATION}/{dolby_digital_plus}')
-        change_program_config(
-            f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
-        if smpte:
-            smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
-
-    elif program_config:
-        change_program_config(
-            f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
-        if smpte:
-            smpte_wrapper('flight_audio.wav', 'wav')
 
 
 if __name__ == '__main__':
