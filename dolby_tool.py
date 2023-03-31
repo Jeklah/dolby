@@ -1,11 +1,32 @@
 #!/bin/env python3
 
 import subprocess
+import sys
+import os
 import click
 
 DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/DDP_Pro_Enc_v3.10.2_x86_32.exe'
 SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
 STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023'
+FFPROBE = '/usr/bin/ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1'
+PROG_CONF_CHAN_NUM = {1: 1, 2: 2, 3: 4, 4: 4, 5: 5, 6: 5, 7: 6, 21: 8, 24: 7}
+
+
+def channel_check(input_file: str, program_config: int) -> None:
+    """
+    Function to check how many audio channels a file has, to make sure there
+    are enough channels to do a change of program configuration.
+    If there are not enough channels, a message will be printed out and the
+    tool will exit.
+
+    :param str: String to be used for the input file.
+    :param int: Integer to be used as the program config index to be checked.
+    """
+    input_file_channel_number = int(os.popen(
+        f'{FFPROBE} {input_file}').read())
+    if input_file_channel_number < PROG_CONF_CHAN_NUM[program_config]:
+        print('The input file does not have enough audio channels to do this program configuration change.')
+        sys.exit()
 
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
@@ -47,11 +68,8 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 
     NOTE: Modes -a0, -a1 and -a2 require -l0 (LFE disabled).
 
-    :param str: String to be used as the input file.
-    :param int: Number used to signify which program configuration is desired.
-    """
-    audio_coding_modes = [
-        1,   # C
+    Program Configuration Modes:
+        1,   #     C
         2,   # L R
         3,   # L R C LFE
         4,   # L R   LFE Ls
@@ -60,7 +78,11 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
         7,   # L R C LFE Ls Rs
         21,  # L R C LFE Ls Rs Lrs Rrs
         24   # L R C LFE Ls Rs Cs
-    ]
+
+    :param str: String to be used as the input file.
+    :param int: Number used to signify which program configuration is desired.
+    :param str: String to be used as the output file name.
+    """
     filepath_length = len(input_file.split('/'))
     filename = input_file.split('/')[filepath_length - 1].split('.')[0]
     filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
@@ -102,6 +124,8 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
         create_dolby_digital(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital)
         if program_config:
+            channel_check(
+                f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
             change_program_config(
                 f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
         if smpte:
@@ -113,6 +137,8 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
         create_dolby_digital_plus(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital_plus)
         if program_config:
+            channel_check(
+                f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
             change_program_config(
                 f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
         if smpte:
@@ -121,20 +147,24 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
     # Changing program configuration with no input or output and without
     # creating a dolby file. (Not a likely use case).
     if program_config and not dolby_digital and not dolby_digital_plus and not input_file and not output_file:
+        channel_check(f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
 
     # Handling changing program configuration when input_file and output_file
     # are provided.
     elif program_config and input_file and output_file:
+        channel_check(input_file, program_config)
         change_program_config(input_file, program_config, output_file)
         if smpte:
             smpte_wrapper(f'{output_file}', f'{input_file.split(".")[1]}')
     elif program_config and input_file:
+        channel_check(input_file, program_config)
         change_program_config(input_file, program_config)
         if smpte:
             smpte_wrapper(f'{input_file}', f'{input_file.split(".")[1]}')
     elif program_config and output_file:
+        channel_check(f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config, output_file)
         if smpte:
