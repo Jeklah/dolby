@@ -31,24 +31,24 @@ def channel_check(input_file: str, program_config: int) -> None:
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
     """
-    Command to create Dolby Digital Plus files.
+    cmd to create Dolby Digital Plus files.
 
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    command = f'wine {DDP_ENC_LOCATION} -md1 -i{input_file} -o{output_file}.ac3'
-    subprocess.call(command, shell=True)
+    cmd = f'wine {DDP_ENC_LOCATION} -md1 -i{input_file} -o{output_file}.ac3'
+    subprocess.call(cmd, shell=True)
 
 
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     """
-    Command to create Dolby Digital Plus files.
+    cmd to create Dolby Digital Plus files.
 
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    command = f'wine {DDP_ENC_LOCATION} -md0 -i{input_file} -o{output_file}.ec3'
-    subprocess.call(command, shell=True)
+    cmd = f'wine {DDP_ENC_LOCATION} -md0 -i{input_file} -o{output_file}.ec3'
+    subprocess.call(cmd, shell=True)
 
 
 def smpte_wrapper(input_file: str, filetype: str) -> None:
@@ -88,11 +88,10 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
     filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
     if output_file == "":
         output_file = filename
-    if program_config in {1, 2}:
-        command = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config} -l0'
-    else:
-        command = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config} -l1'
-    subprocess.call(command, shell=True)
+    lfe_flag = ' -l0' if program_config in {1, 2} else ' -l1'
+    cmd = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config}'
+    cmd += lfe_flag
+    subprocess.call(cmd, shell=True)
 
 
 @click.command()
