@@ -123,10 +123,16 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
         create_dolby_digital(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital)
         if program_config:
-            channel_check(
-                f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
-            change_program_config(
-                f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
+            if program_config > 6:
+                print(
+                    'Dolby Digital Does not support 7.0 or 7.1, only Dolby Digital Plus supports this. Please use that format.')
+                subprocess.call(f'rm ./{dolby_digital}.ac3', shell=True)
+                sys.exit()
+            else:
+                channel_check(
+                    f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
+                change_program_config(
+                    f'{STD_IO_LOCATION}/{dolby_digital}.ac3', program_config)
         if smpte:
             smpte_wrapper(f'{dolby_digital}', 'ac3')
 
