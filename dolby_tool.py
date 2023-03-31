@@ -1,5 +1,10 @@
 #!/bin/env python3
-
+"""
+This is a small tool made with the aim of creating Dolby content as
+well as the ability to change program configuration.
+This tool is able to create both Dolby Digital and Dolby Digital Plus
+files, as well as wrapping them for SMPTE if needed.
+"""
 import subprocess
 import sys
 import os
