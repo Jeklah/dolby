@@ -39,6 +39,7 @@ def create_dolby_e(input_file: str, output_file: str, output_format: int, progra
     output_format_flag = '-m0' if output_format == 0 else '-m1'
     output_fmt = 'dde' if output_format == 0 else 'wav'
     dolbye_command = f'{DDE_ENC_LOCATION} -i{input_file} -o{STD_IO_LOCATION}/{output_file}.{output_fmt} {output_format_flag} -p{program_config} -n0'
+    print(f'{dolbye_command}')
     subprocess.call(dolbye_command, shell=True)
 
 
@@ -118,21 +119,46 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
 def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int) -> None:
     """
+    \b
     This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
     files as well as changing the program configuration and SMPTE wrapping.
     Input file and output file can be specified, if they are not, the output
     file name will be the same as the input file.
     If the input file is not provided, this will use the file flight_audio.wav
     as an example.
+    \b
+    NOTE Regaring Dolby Digital (Plus) Program Configuration:
+    Modes -a0, -a1 and -a2 require -l0 (LFE disabled).
+    \b
+    Program Configuration Modes for Dolby Digital (Plus):
+        1,   #     C
+        2,   # L R
+        3,   # L R C LFE
+        4,   # L R   LFE Ls
+        5,   # L R C LFE Ls
+        6,   # L R   LFE Ls Rs
+        7,   # L R C LFE Ls Rs
+        21,  # L R C LFE Ls Rs Lrs Rrs
+        24   # L R C LFE Ls Rs Cs
+    \b
+    Program Configuration Modes for Dolby E (0 is default):
+        0 = 5.1+2     1 = 5.1+1+1      2 = 4+4
+        3 = 4+2+2     4 = 4+2+1+1      5 = 4+1+1+1+1
+        6 = 2+2+2+2   7 = 2+2+2+1+1    8 = 2+2+1+1+1+1
 
-    :param str: String to be used as the Dolby Digital file name on creation.
-    :param str: String to be used as the Dolby Digital Plus file name on creation.
-    :param str: String to be used as the Dolby E file name on creation.
-    :param int: Integer to select the output format for Dolby E files.
-    :param int: Integer to be used to identify the desired program configuration to be used.
-    :param bool: Flag for whether the output file is to be SMPTE wrapped.
-    :param str: String to be used as the input file.
-    :param str: String to be used as the output file.
+
+
+
+
+
+    :param dolby_digital:       String to be used as the Dolby Digital file name on creation.
+    :param dolby_digital_plus:  String to be used as the Dolby Digital Plus file name on creation.
+    :param dolby_e:             String to be used as the Dolby E file name on creation.
+    :param output_fmt:          Integer to select the output format for Dolby E files.
+    :param program_config:      Integer to be used to identify the desired program configuration to be used.
+    :param smpte:               Flag for whether the output file is to be SMPTE wrapped.
+    :param input_file:          String to be used as the input file.
+    :param output_file:         String to be used as the output file.
     """
     # Handling the creation of dolby digital files and whether the program
     # configuration is to be changed as well as SMPTE wrapping.
@@ -173,7 +199,7 @@ def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_conf
 
     if dolby_e:
         create_dolby_e(f'{STD_IO_LOCATION}/flight_audio.wav',
-                       f'{dolby_e}', 0, 18)
+                       f'{dolby_e}', output_fmt, 18)
 
     # Changing program configuration with no input or output and without
     # creating a dolby file. (Not a likely use case).
