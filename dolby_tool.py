@@ -3,7 +3,7 @@
 This is a small tool made with the aim of creating Dolby content as
 well as the ability to change program configuration.
 This tool is able to create both Dolby Digital and Dolby Digital Plus
-files, as well as wrapping them for SMPTE if needed.
+and Dolby E files, as well as wrapping them for SMPTE if needed.
 """
 import subprocess
 import sys
@@ -12,6 +12,7 @@ import click
 
 DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/DDP_Pro_Enc_v3.10.2_x86_32.exe'
 SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
+DDE_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/dolbye_e.exe'
 STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023'
 FFPROBE = '/usr/bin/ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1'
 PROG_CONF_CHAN_NUM = {1: 1, 2: 2, 3: 4, 4: 4, 5: 5, 6: 5, 7: 6, 21: 8, 24: 7}
@@ -34,6 +35,13 @@ def channel_check(input_file: str, program_config: int) -> None:
         sys.exit()
 
 
+def create_dolby_e(input_file: str, output_file: str, output_format: int, program_config: int) -> None:
+    output_format_flag = '-m0' if output_format == 0 else '-m1'
+    output_fmt = 'dde' if output_format == 0 else 'wav'
+    dolbye_command = f'{DDE_ENC_LOCATION} -i{input_file} -o{STD_IO_LOCATION}/{output_file}.{output_fmt} {output_format_flag} -p{program_config} -n0'
+    subprocess.call(dolbye_command, shell=True)
+
+
 def create_dolby_digital(input_file: str, output_file: str) -> None:
     """
     cmd to create Dolby Digital Plus files.
@@ -41,7 +49,7 @@ def create_dolby_digital(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    cmd = f'wine {DDP_ENC_LOCATION} -md1 -i{input_file} -o{output_file}.ac3'
+    cmd = f'wine {DDP_ENC_LOCATION} -md1 -i{input_file} -o{STD_IO_LOCATION}/{output_file}.ac3'
     subprocess.call(cmd, shell=True)
 
 
@@ -52,7 +60,7 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     :param str: String to be used as the input file name.
     :param str: String to be used as the output file name.
     """
-    cmd = f'wine {DDP_ENC_LOCATION} -md0 -i{input_file} -o{output_file}.ec3'
+    cmd = f'wine {DDP_ENC_LOCATION} -md0 -i{input_file} -o{STD_IO_LOCATION}/{output_file}.ec3'
     subprocess.call(cmd, shell=True)
 
 
@@ -63,7 +71,7 @@ def smpte_wrapper(input_file: str, filetype: str) -> None:
     :param str: String to be used as the input file.
     :param str: String to be used as the filetype of the input file.
     """
-    smpte_wrap = f'wine {SMPTE_LOCATION} -i{input_file}.{filetype} -o{input_file}.wav'
+    smpte_wrap = f'wine {SMPTE_LOCATION} -i{input_file}.{filetype} -o{STD_IO_LOCATION}/{input_file}.wav'
     subprocess.call(smpte_wrap, shell=True)
 
 
@@ -94,7 +102,7 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
     if output_file == "":
         output_file = filename
     lfe_flag = ' -l0' if program_config in {1, 2} else ' -l1'
-    cmd = f'wine {DDP_ENC_LOCATION} -i{input_file} -o./{output_file}.{filetype} -a{program_config}'
+    cmd = f'wine {DDP_ENC_LOCATION} -i{input_file} -o{output_file}.{filetype} -a{program_config}'
     cmd += lfe_flag
     subprocess.call(cmd, shell=True)
 
@@ -102,11 +110,13 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 @click.command()
 @click.option('--dolby_digital', '-cdd', help='Create a Dolby Digital file', type=str)
 @click.option('--dolby_digital_plus', '-cddp', help='Create a Dolby Digital Plus file', type=str)
+@click.option('--dolby_e', '-cde', help='Create a Dolby E file', type=str)
+@click.option('--output_fmt', '-ofmt', help='Select the output format for Dolby E (0 for .dde or 1 for .wav)', type=int)
 @click.option('--program_config', '-pc', help='Change the program configuration/speaker layout', type=int)
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
 @click.option('--input_file', '-i', help='String to be used as the input file', type=str)
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
-def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte: bool, input_file: str, output_file: str) -> None:
+def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int) -> None:
     """
     This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
     files as well as changing the program configuration and SMPTE wrapping.
@@ -117,6 +127,8 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
 
     :param str: String to be used as the Dolby Digital file name on creation.
     :param str: String to be used as the Dolby Digital Plus file name on creation.
+    :param str: String to be used as the Dolby E file name on creation.
+    :param int: Integer to select the output format for Dolby E files.
     :param int: Integer to be used to identify the desired program configuration to be used.
     :param bool: Flag for whether the output file is to be SMPTE wrapped.
     :param str: String to be used as the input file.
@@ -131,7 +143,8 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
             if program_config > 6:
                 print(
                     'Dolby Digital Does not support 7.0 or 7.1, only Dolby Digital Plus supports this. Please use that format.')
-                subprocess.call(f'rm ./{dolby_digital}.ac3', shell=True)
+                subprocess.call(
+                    f'rm {STD_IO_LOCATION}/{dolby_digital}.ac3', shell=True)
                 sys.exit()
             else:
                 channel_check(
@@ -147,12 +160,20 @@ def main(dolby_digital: str, dolby_digital_plus: str, program_config: int, smpte
         create_dolby_digital_plus(
             f'{STD_IO_LOCATION}/flight_audio.wav', dolby_digital_plus)
         if program_config:
+            # print('Checking channels')
             channel_check(
                 f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
+            # print('Changing program config')
+            # print(f'{STD_IO_LOCATION}/{dolby_digital_plus}')
             change_program_config(
                 f'{STD_IO_LOCATION}/{dolby_digital_plus}.ec3', program_config)
         if smpte:
-            smpte_wrapper(f'{dolby_digital_plus}', 'ec3')
+            # print('Wrapping as SMPTE')
+            smpte_wrapper(f'./{dolby_digital_plus}', 'ec3')
+
+    if dolby_e:
+        create_dolby_e(f'{STD_IO_LOCATION}/flight_audio.wav',
+                       f'{dolby_e}', 0, 18)
 
     # Changing program configuration with no input or output and without
     # creating a dolby file. (Not a likely use case).
