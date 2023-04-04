@@ -142,15 +142,16 @@ def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_conf
         24   # L R C LFE Ls Rs Cs
     \b
     Program Configuration Modes for Dolby E (0 is default):
-        0 = 5.1+2     1 = 5.1+1+1      2 = 4+4
-        3 = 4+2+2     4 = 4+2+1+1      5 = 4+1+1+1+1
-        6 = 2+2+2+2   7 = 2+2+2+1+1    8 = 2+2+1+1+1+1
-
-
-
-
-
-
+        0 = 5.1+2           1 = 5.1+1+1             2 = 4+4
+        3 = 4+2+2           4 = 4+2+1+1             5 = 4+1+1+1+1
+        6 = 2+2+2+2         7 = 2+2+2+1+1           8 = 2+2+1+1+1+1
+        9 = 2+1+1+1+1+1     10 = 1+1+1+1+1+1+1+1    11 = 5.1
+        12 = 4+2            13 = 4+1+1              14 = 2+2+2
+        15 = 2+2+1+1        16 = 2+1+1+1+1          17 = 1+1+1+1+1+1
+        18 = 4              19 = 2+2                20 = 2+1+1
+        21 = 1+1+1+1
+    \b
+    \b
     :param dolby_digital:       String to be used as the Dolby Digital file name on creation.
     :param dolby_digital_plus:  String to be used as the Dolby Digital Plus file name on creation.
     :param dolby_e:             String to be used as the Dolby E file name on creation.
