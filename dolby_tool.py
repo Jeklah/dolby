@@ -56,8 +56,7 @@ def create_dolby_e(input_file: str, output_file: str, output_format: int, progra
     :param input_file:      String to be used as the input file.
     :param output_file:     String to be used as the output file.
     :param output_format:   Integer to be used as the flag to indicate whether
-                            Dolby Digital or Dolby E is to be used as the output
-                            format.
+                            .wav or .dde is to be used as the output format.
     :param program_config:  Integer used to signify which program configuration
                             is to be used.
     """
