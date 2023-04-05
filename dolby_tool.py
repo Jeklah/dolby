@@ -10,9 +10,9 @@ import sys
 import os
 import click
 
-DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/DDP_Pro_Enc_v3.10.2_x86_32.exe'
-SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_legacy_ref_encoder/Dolby_Digital_Plus_Pro_System_Implementation_Kit_v7.6/Test_Tools/smpte.exe'
-DDE_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/dolbye_e.exe'
+DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_d/DDP_Pro_Enc_v3.10.2_x86_32.exe'
+SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_d/smpte.exe'
+DDE_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_e/dolbye_e.exe'
 STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023'
 FFPROBE = '/usr/bin/ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1'
 PROG_CONF_DD_CHAN_NUM = {1: 1, 2: 2, 3: 4,
@@ -154,7 +154,7 @@ def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_conf
     NOTE Regaring Dolby Digital (Plus) Program Configuration:
     Modes -a0, -a1 and -a2 require -l0 (LFE disabled).
     \b
-    Program Configuration Modes for Dolby Digital (Plus):
+    Program Configuration Modes for Dolby Digital and Dolby Digital Plus:
         1,   #     C
         2,   # L R
         3,   # L R C LFE
