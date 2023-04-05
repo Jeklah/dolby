@@ -10,11 +10,12 @@ import sys
 import os
 import click
 
-DDP_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_d/DDP_Pro_Enc_v3.10.2_x86_32.exe'
-SMPTE_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_d/smpte.exe'
-DDE_ENC_LOCATION = '/media/sf_Shared_Folder/dolby/2023/dolby_e/dolbye_e.exe'
 STD_IO_LOCATION = '/media/sf_Shared_Folder/dolby/2023'
-FFPROBE = '/usr/bin/ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1'
+DDP_ENC_LOCATION = f'{STD_IO_LOCATION}/dolby_d/DDP_Pro_Enc_v3.10.2_x86_32.exe'
+SMPTE_LOCATION = f'{STD_IO_LOCATION}/dolby_d/smpte.exe'
+DDE_ENC_LOCATION = f'{STD_IO_LOCATION}/dolby_e/dolbye_e.exe'
+FFPROBE_ARGS = ' -v error -select_streams a:0 -show_entries stream=channels -of default=noprint wrappers=1:nokey=1'
+FFPROBE = '/usr/bin/ffprobe'
 PROG_CONF_DD_CHAN_NUM = {1: 1, 2: 2, 3: 4,
                          4: 4, 5: 5, 6: 5, 7: 6, 21: 8, 24: 7}
 PROG_CONF_DE_CHAN_NUM = {0: 8, 1: 8, 2: 8, 3: 8,
@@ -37,9 +38,10 @@ def channel_check(input_file: str, program_config: int, dolby_type: int) -> None
                            Dolby Digital or Dolby E.
     """
     input_file_channel_number = int(os.popen(
-        f'{FFPROBE} {input_file}').read())
+        f'{FFPROBE} {FFPROBE_ARGS} {input_file}').read())
     dolby = 'dolby_digital' if dolby_type == 0 else 'dolby_e'
-    if dolby == 'dolby_digital':
+    dolby = 'dolby_digital_plus' if dolby_type == 0 else 'dolby_e'
+    if dolby in {'dolby_digital', 'dolby_digital_plus'}:
         if input_file_channel_number < PROG_CONF_DD_CHAN_NUM[program_config]:
             print('The input file does not have enough \
                    audio channels to do this program configuration change.')
