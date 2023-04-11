@@ -93,7 +93,7 @@ def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
 
 def smpte_wrapper(input_file: str, filetype: str) -> None:
     """
-    Wrap .ac3 or .ec3 file as SMPTE .wav file.
+    Wrap .ac3 or .ec3 file as SMPTE ST 337 .wav file.
 
     :param input_file: String to be used as the input file.
     :param filetype:   String to be used as the filetype of the input file.
@@ -240,6 +240,7 @@ choice for Dolby E. Please choose a value from 0 to 21.')
             dolby_digital_plus and not \
             input_file and not output_file:
         # needs to find out the type of dolby before changing prog confs
+        # this double checking is not ideal, but it works for now.
         channel_check(f'{STD_IO_LOCATION}/flight_audio.wav', program_config, 0)
         channel_check(f'{STD_IO_LOCATION}/flight_audio.wav', program_config, 1)
         change_program_config(
