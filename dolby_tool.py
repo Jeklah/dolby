@@ -16,6 +16,7 @@ SMPTE_LOCATION = f'{STD_IO_LOCATION}/dolby_d/smpte.exe'
 DDE_ENC_LOCATION = f'{STD_IO_LOCATION}/dolby_e/dolbye_e.exe'
 FFPROBE_ARGS = ' -v error -select_streams a:0 -show_entries stream=channels -of default=noprint wrappers=1:nokey=1'
 FFPROBE = '/usr/bin/ffprobe'
+FFMPEG = '/usr/bin/ffmpeg'
 PROG_CONF_DD_CHAN_NUM = {1: 1, 2: 2, 3: 4,
                          4: 4, 5: 5, 6: 5, 7: 6, 21: 8, 24: 7}
 PROG_CONF_DE_CHAN_NUM = {0: 8, 1: 8, 2: 8, 3: 8,
@@ -134,6 +135,18 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
     subprocess.call(cmd, shell=True)
 
 
+def mux(input_video: str, input_audio: str, output_video: str) -> None:
+    """
+    This function is to put created audio back into original video files.
+
+    :param input_video:     String to be used as the input video file.
+    :param input_audio:     String to be used as the input audio file to be added to the video.
+    :param output_video:    String to be used as the name of the output video file.
+    """
+    cmd = f'{FFMPEG} -i {input_video} -i {input_audio} -map 0 -map 1 -c copy -c:a:0 aac -c:a:1 aac -strict experimental {output_video}'
+    subprocess.call(cmd, shell=True)
+
+
 @click.command()
 @click.option('--dolby_digital', '-cdd', help='Create a Dolby Digital file', type=str)
 @click.option('--dolby_digital_plus', '-cddp', help='Create a Dolby Digital Plus file', type=str)
@@ -143,13 +156,14 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
 @click.option('--input_file', '-i', help='String to be used as the input file', type=str)
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
-def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int) -> None:
+@click.option('--mux_aud_to_vid', '-mux', help='Mux audio back into video file while keeping original audio.', is_flag=True, default=False)
+def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux_aud_to_vid: bool) -> None:
     """
     \b
     This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
-    files as well as changing the program configuration and SMPTE wrapping.
-    Input file and output file can be specified, if they are not, the output
-    file name will be the same as the input file.
+    and Dolby E files as well as changing the program configuration and SMPTE
+    wrapping. Input file and output file can be specified, if they are not,
+    the output file name will be the same as the input file.
     If the input file is not provided, this will use the file flight_audio.wav
     as an example.
     \b
@@ -246,8 +260,13 @@ choice for Dolby E. Please choose a value from 0 to 21.')
         change_program_config(
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
 
-    # Handling changing program configuration when input_file and output_file
-    # are provided.
+    # Muxing audio files back into the original video file.
+    if mux_aud_to_vid and input_file:
+        mux(f'{STD_IO_LOCATION}/flight.mov', input_file,
+            f'{STD_IO_LOCATION}/flight_new_audio.mov')
+
+        # Handling changing program configuration when input_file and output_file
+        # are provided.
     elif program_config and input_file and output_file:
         channel_check(input_file, program_config, 0)
         channel_check(input_file, program_config, 1)
