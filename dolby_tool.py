@@ -98,7 +98,7 @@ def smpte_wrapper(input_file: str, filetype: str) -> None:
     :param input_file: String to be used as the input file.
     :param filetype:   String to be used as the filetype of the input file.
     """
-    smpte_wrap = f'wine {SMPTE_LOCATION} -i{input_file}.{filetype} -o{STD_IO_LOCATION}/{input_file}.wav'
+    smpte_wrap = f'wine {SMPTE_LOCATION} -i{STD_IO_LOCATION}/{input_file}.{filetype} -o{STD_IO_LOCATION}/{input_file}.wav'
     subprocess.call(smpte_wrap, shell=True)
 
 
