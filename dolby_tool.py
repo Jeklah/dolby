@@ -65,9 +65,9 @@ def create_dolby_e(input_file: str, output_file: str, output_format: int, progra
     """
     output_format_flag = '-m0' if output_format == 0 else '-m1'
     output_fmt = 'dde' if output_format == 0 else 'wav'
-    dolbye_command = f'{DDE_ENC_LOCATION} -i{input_file} -o{STD_IO_LOCATION}/{output_file}.{output_fmt} {output_format_flag} -p{program_config} -n0'
+    dolbye_cmd = f'{DDE_ENC_LOCATION} -i{input_file} -o{STD_IO_LOCATION}/{output_file}.{output_fmt} {output_format_flag} -p{program_config} -n0'
     # print(f'{dolbye_command}')
-    subprocess.call(dolbye_command, shell=True)
+    subprocess.call(dolbye_cmd, shell=True)
 
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
@@ -135,7 +135,7 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
     subprocess.call(cmd, shell=True)
 
 
-def mux(input_video: str, input_audio: str, output_video: str) -> None:
+def mux_aud_to_vid(input_video: str, input_audio: str, output_video: str, video_ext: str) -> None:
     """
     This function is to put created audio back into original video files.
 
@@ -143,7 +143,7 @@ def mux(input_video: str, input_audio: str, output_video: str) -> None:
     :param input_audio:     String to be used as the input audio file to be added to the video.
     :param output_video:    String to be used as the name of the output video file.
     """
-    cmd = f'{FFMPEG} -i {input_video} -i {input_audio} -map 0 -map 1 -c copy -c:a:0 aac -c:a:1 aac -strict experimental {output_video}'
+    cmd = f'{FFMPEG} -i {input_video} -i {input_audio} -map 0 -map 1 -c copy -c:a:0 aac -c:a:1 aac -strict experimental {output_video}.{video_ext}'
     subprocess.call(cmd, shell=True)
 
 
@@ -156,8 +156,8 @@ def mux(input_video: str, input_audio: str, output_video: str) -> None:
 @click.option('--smpte', '-s', help='Wrap an ac3 or ec3 file up as SMPTE wav file.', is_flag=True, default=False)
 @click.option('--input_file', '-i', help='String to be used as the input file', type=str)
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
-@click.option('--mux_aud_to_vid', '-mux', help='Mux audio back into video file while keeping original audio.', is_flag=True, default=False)
-def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux_aud_to_vid: bool) -> None:
+@click.option('--mux', '-mux', help='Mux audio back into video file while keeping original audio.', is_flag=True, default=False)
+def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux: bool, video_ext: str) -> None:
     """
     \b
     This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
@@ -261,12 +261,15 @@ choice for Dolby E. Please choose a value from 0 to 21.')
             f'{STD_IO_LOCATION}/flight_audio.wav', program_config)
 
     # Muxing audio files back into the original video file.
-    if mux_aud_to_vid and input_file:
-        mux(f'{STD_IO_LOCATION}/flight.mov', input_file,
-            f'{STD_IO_LOCATION}/flight_new_audio.mov')
+    if mux and input_file and output_fmt:
+        filepath_length = len(input_file.split('/'))
+        filename = input_file.split('/')[filepath_length - 1].split('.')[0]
+        # filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
+        mux_aud_to_vid(f'{STD_IO_LOCATION}/flight.mov', input_file,
+                       f'{STD_IO_LOCATION}/{filename}.{video_ext}')
 
-        # Handling changing program configuration when input_file and output_file
-        # are provided.
+        # Handling changing program configuration when input_file and
+        # output_file are provided.
     elif program_config and input_file and output_file:
         channel_check(input_file, program_config, 0)
         channel_check(input_file, program_config, 1)
