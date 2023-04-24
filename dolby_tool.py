@@ -41,7 +41,7 @@ def channel_check(input_file: str, program_config: int, dolby_type: int) -> None
     input_file_channel_number = int(os.popen(
         f'{FFPROBE} {FFPROBE_ARGS} {input_file}').read())
     dolby = 'dolby_digital' if dolby_type == 0 else 'dolby_e'
-    dolby = 'dolby_digital_plus' if dolby_type == 0 else 'dolby_e'
+    dolby = 'dolby_digital_plus' if dolby_type == 0 and dolby != 'dolby_digital' else 'dolby_e'
     if dolby in {'dolby_digital', 'dolby_digital_plus'}:
         if input_file_channel_number < PROG_CONF_DD_CHAN_NUM[program_config]:
             print('The input file does not have enough \
