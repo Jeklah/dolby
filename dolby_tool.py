@@ -158,7 +158,7 @@ def mux_aud_to_vid(input_video: str, input_audio: str, output_video: str, video_
 @click.option('--input_file', '-i', help='String to be used as the input file', type=str)
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
 @click.option('--mux', '-mux', help='Mux audio back into video file while keeping original audio.', is_flag=True, default=False)
-@click.option('--vid_ext', '-ve', help='Extension to be used for videos.', type=str)
+@click.option('--video_ext', '-ve', help='Extension to be used for videos.', type=str)
 def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux: bool, vid_ext: str) -> None:
     """
     \b
