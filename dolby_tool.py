@@ -28,7 +28,7 @@ PROG_CONF_DE_CHAN_NUM = {0: 8, 1: 8, 2: 8, 3: 8,
 
 def channel_check(input_file: str, program_config: int, dolby_type: int) -> None:
     """
-    Function to check how many audio channels a file has, to make sure there
+    Check how many audio channels a file has, to make sure there
     are enough channels to do a change of program configuration.
     If there are not enough channels, a message will be printed out and the
     tool will exit.
@@ -54,7 +54,7 @@ def channel_check(input_file: str, program_config: int, dolby_type: int) -> None
 
 def create_dolby_e(input_file: str, output_file: str, output_format: int, program_config: int) -> None:
     """
-    Function to create a Dolby E file.
+    Create a Dolby E file.
 
     :param input_file:      String to be used as the input file.
     :param output_file:     String to be used as the output file.
@@ -72,7 +72,7 @@ def create_dolby_e(input_file: str, output_file: str, output_format: int, progra
 
 def create_dolby_digital(input_file: str, output_file: str) -> None:
     """
-    Function to create Dolby Digital Plus files.
+    Create Dolby Digital Plus files.
 
     :param input_file:  String to be used as the input file name.
     :param output_file: String to be used as the output file name.
@@ -83,7 +83,7 @@ def create_dolby_digital(input_file: str, output_file: str) -> None:
 
 def create_dolby_digital_plus(input_file: str, output_file: str) -> None:
     """
-    Function to create Dolby Digital Plus files.
+    Create Dolby Digital Plus files.
 
     :param input_file:  String to be used as the input file name.
     :param output_file: String to be used as the output file name.
@@ -137,7 +137,7 @@ def change_program_config(input_file: str, program_config: int, output_file="") 
 
 def mux_aud_to_vid(input_video: str, input_audio: str, output_video: str, video_ext: str) -> None:
     """
-    This function is to put created audio back into original video files.
+    Put created audio back into original video files.
 
     :param input_video:     String to be used as the input video file.
     :param input_audio:     String to be used as the input audio file to be added to the video.
@@ -159,7 +159,7 @@ def mux_aud_to_vid(input_video: str, input_audio: str, output_video: str, video_
 @click.option('--output_file', '-o', help='String to be used as the output file', type=str)
 @click.option('--mux', '-mux', help='Mux audio back into video file while keeping original audio.', is_flag=True, default=False)
 @click.option('--video_ext', '-ve', help='Extension to be used for videos.', type=str)
-def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux: bool, vid_ext: str) -> None:
+def main(dolby_digital: str, dolby_digital_plus: str, dolby_e: str, program_config: int, smpte: bool, input_file: str, output_file: str, output_fmt: int, mux: bool, video_ext: str) -> None:
     """
     \b
     This is a tool that allows creation of Dolby Digital and Dolby Digital Plus
@@ -268,7 +268,7 @@ choice for Dolby E. Please choose a value from 0 to 21.')
         filename = input_file.split('/')[filepath_length - 1].split('.')[0]
         # filetype = input_file.split('/')[filepath_length - 1].split('.')[1]
         mux_aud_to_vid(f'{STD_IO_LOCATION}/flight.mov', input_file,
-                       f'{STD_IO_LOCATION}/{filename}.{video_ext}')
+                       f'{STD_IO_LOCATION}/{filename}', video_ext)
 
         # Handling changing program configuration when input_file and
         # output_file are provided.
